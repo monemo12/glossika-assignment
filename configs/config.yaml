@@ -1,0 +1,29 @@
+server:
+  port: 8080
+  host: "0.0.0.0"
+  environment: dev
+
+mysql:
+  host: "mysql"
+  port: 3306
+  user: "myuser"
+  password: "mysecretpassword"
+  database: "recommendation_db"
+
+redis:
+  host: "redis"
+  port: 6379
+  password: ""
+  db: 0
+  cacheTTLMinutes: 10
+
+jwt:
+  secret: "super-secret-key"
+  expireMinutes: 60
+
+email:
+  sender: "noreply@example.com"
+  smtpHost: "smtp.example.com"
+  smtpPort: 587
+  username: "noreply@example.com"
+  password: "smtp-password"
