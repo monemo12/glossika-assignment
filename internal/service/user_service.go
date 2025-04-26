@@ -130,6 +130,15 @@ func (s *UserService) Login(ctx context.Context, req *model.LoginRequest) (*mode
 
 // VerifyEmail 處理郵件驗證
 func (s *UserService) VerifyEmail(ctx context.Context, token string) error {
-	// 待實現
-	return errors.New("未實現")
+	user, err := s.userRepo.GetUserByVerificationToken(ctx, token)
+	if err != nil {
+		return errors.New("無法驗證郵件: " + err.Error())
+	}
+
+	err = s.userRepo.UpdateUserVerification(ctx, user.ID, true)
+	if err != nil {
+		return errors.New("無法更新用戶驗證狀態: " + err.Error())
+	}
+
+	return nil
 }

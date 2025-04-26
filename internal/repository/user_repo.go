@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"glossika-assignment/internal/database"
 	"glossika-assignment/internal/model"
 
@@ -13,6 +12,7 @@ import (
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user *model.User) (*model.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*model.User, error)
+	GetUserByVerificationToken(ctx context.Context, token string) (*model.User, error)
 	UpdateUserVerification(ctx context.Context, userID string, verified bool) error
 	CheckUserExists(ctx context.Context, email string) (bool, error)
 }
@@ -48,9 +48,24 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*mod
 	return &user, nil
 }
 
+// GetUserByVerificationToken 獲取用戶
+func (r *UserRepository) GetUserByVerificationToken(ctx context.Context, token string) (*model.User, error) {
+	var user model.User
+	result := r.db.Where("verification_token = ?", token).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 // UpdateUserVerification 更新用戶驗證狀態
 func (r *UserRepository) UpdateUserVerification(ctx context.Context, userID string, verified bool) error {
-	return errors.New("未實現")
+	var user model.User
+	result := r.db.Model(&user).Where("id = ?", userID).Update("verified", verified).Update("verification_token", nil)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 // CheckUserExists 檢查用戶是否存在

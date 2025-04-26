@@ -47,8 +47,3 @@ type LoginResponse struct {
 type VerifyEmailRequest struct {
 	Token string `json:"token"`
 }
-
-// VerifyEmailResponse 定義驗證郵件響應
-type VerifyEmailResponse struct {
-	Result bool `json:"result"`
-}

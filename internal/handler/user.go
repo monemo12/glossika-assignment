@@ -109,8 +109,8 @@ func (h *UserHandler) VerifyEmail(c *gin.Context) {
 	}
 
 	// 返回響應
-	c.JSON(http.StatusOK, model.VerifyEmailResponse{
-		Result: true,
+	c.JSON(http.StatusOK, gin.H{
+		"status": "success",
 	})
 }
 
