@@ -63,3 +63,8 @@ func IsValidPassword(password string) (bool, string) {
 
 	return true, ""
 }
+
+// CheckPassword 檢查密碼是否正確
+func CheckPassword(hashedPassword, password string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password)) == nil
+}
