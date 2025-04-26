@@ -58,5 +58,5 @@ glossika-assignment/
 
 ## Execution
 
-1. Prepare `.env` file
-2. Run by docker-compose `docker-compose --env-file .env`
+1. Prepare `.env` file to put under the project root path.
+2. Run by docker-compose `docker-compose --env-file .env up -d`
