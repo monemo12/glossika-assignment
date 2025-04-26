@@ -1,0 +1,46 @@
+@startuml
+
+' 定義 UserService 與其相依元件
+class UserService {
+    +Register()
+    +Login()
+    +VerifyEmail()
+}
+
+class UserRepo {
+    +CreateUser()
+    +GetUserByEmail()
+    +UpdateVerified()
+}
+
+class MySQL
+
+UserService --> UserRepo
+UserRepo --> MySQL
+
+' RecommendationService 部分
+class RecommendationService {
+    +GetRecommendations()
+}
+
+class RecommendationRepository {
+    +FetchFromDB()
+    +CacheToRedis()
+    +FetchFromRedis()
+}
+
+RecommendationService --> RecommendationRepository
+
+class Redis
+
+RecommendationRepository --> Redis
+RecommendationRepository --> MySQL
+
+' EmailService
+class EmailService {
+    +SendVerification()
+}
+
+UserService --> EmailService
+
+@enduml
