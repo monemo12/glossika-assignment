@@ -6,6 +6,8 @@ import (
 
 	"glossika-assignment/internal/config"
 	"glossika-assignment/internal/database"
+	"glossika-assignment/internal/handler"
+	"glossika-assignment/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,6 +18,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
+
+	// 初始化 JWT
+	utils.InitJWT(cfg.JWT)
 
 	// 初始化 MySQL 連接
 	mysqlClient := database.NewMySQLClient(cfg.MySQL)
@@ -81,6 +86,17 @@ func main() {
 			"message": "Welcome to Glossika Assignment API!",
 		})
 	})
+
+	// 初始化 API 路由
+	apiGroup := r.Group("/api/v1")
+
+	// 設置用戶路由
+	userHandler := handler.NewUserHandler(mysqlClient)
+	userHandler.SetupRoutes(apiGroup)
+
+	// 設置推薦路由
+	recommendationHandler := handler.NewRecommendationHandler(mysqlClient)
+	recommendationHandler.SetupRoutes(apiGroup)
 
 	// 啟動服務器
 	addr := fmt.Sprintf("%s:%s", cfg.Server.Host, cfg.Server.Port)

@@ -4,38 +4,48 @@ import "time"
 
 // User 定義用戶實體
 type User struct {
-	ID        string
-	Email     string
-	Password  string
-	Name      string
-	Verified  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        string    `json:"id"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password,omitempty"`
+	Name      string    `json:"name"`
+	Verified  bool      `json:"verified"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 // RegisterRequest 定義註冊請求
 type RegisterRequest struct {
-	Email    string
-	Password string
-	Name     string
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Name     string `json:"name"`
 }
 
 // RegisterResponse 定義註冊響應
 type RegisterResponse struct {
-	UserID    string
-	Email     string
-	CreatedAt time.Time
+	UserID    string    `json:"userId"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // LoginRequest 定義登錄請求
 type LoginRequest struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // LoginResponse 定義登錄響應
 type LoginResponse struct {
-	Token     string
-	ExpiresAt time.Time
-	User      *User
+	Token     string    `json:"token"`
+	ExpiresAt time.Time `json:"expiresAt"`
+	User      *User     `json:"user"`
+}
+
+// VerifyEmailRequest 定義驗證郵件請求
+type VerifyEmailRequest struct {
+	Token string `json:"token"`
+}
+
+// VerifyEmailResponse 定義驗證郵件響應
+type VerifyEmailResponse struct {
+	Result bool `json:"result"`
 }
