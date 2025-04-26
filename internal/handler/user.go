@@ -1,25 +1,30 @@
 package handler
 
 import (
+	"glossika-assignment/internal/config"
 	"glossika-assignment/internal/database"
 	"glossika-assignment/internal/model"
-	"glossika-assignment/internal/utils"
+	"glossika-assignment/internal/repository"
+	"glossika-assignment/internal/service"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // UserHandler 定義用戶功能的路由處理器
 type UserHandler struct {
-	db database.Database
+	userService service.IUserService
 }
 
 // NewUserHandler 創建新的用戶功能處理器
-func NewUserHandler(db database.Database) *UserHandler {
+func NewUserHandler(db database.MySQLDatabase, cfg config.EmailConfig) *UserHandler {
+
+	userRepo := repository.NewUserRepository(db)
+	emailService := service.NewEmailService(cfg)
+	userService := service.NewUserService(userRepo, emailService)
+
 	return &UserHandler{
-		db: db,
+		userService: userService,
 	}
 }
 
@@ -34,25 +39,18 @@ func (h *UserHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// 檢查請求數據
-	if req.Email == "" || req.Password == "" || req.Name == "" {
+	// 調用服務層執行註冊邏輯
+	resp, err := h.userService.Register(c.Request.Context(), &req)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
-			"error":  "Email, password and name are required",
+			"error":  err.Error(),
 		})
 		return
 	}
 
-	// 生成用戶 ID (在真實實現中會儲存到數據庫)
-	userId := uuid.New().String()
-	now := time.Now()
-
 	// 返回響應
-	c.JSON(http.StatusCreated, model.RegisterResponse{
-		UserID:    userId,
-		Email:     req.Email,
-		CreatedAt: now,
-	})
+	c.JSON(http.StatusCreated, resp)
 }
 
 // Login 處理用戶登錄
@@ -66,44 +64,18 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// 檢查請求數據
-	if req.Email == "" || req.Password == "" {
+	// 調用服務層執行登錄邏輯
+	resp, err := h.userService.Login(c.Request.Context(), &req)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
-			"error":  "Email and password are required",
+			"error":  err.Error(),
 		})
 		return
-	}
-
-	// 模擬用戶驗證 (在真實實現中會檢查數據庫)
-	userId := uuid.New().String()
-	now := time.Now()
-
-	// 生成 JWT 令牌，使用配置中的過期時間
-	token, expiresAt, err := utils.GenerateToken(userId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"status": "error",
-			"error":  "Failed to generate token: " + err.Error(),
-		})
-		return
-	}
-
-	user := &model.User{
-		ID:        userId,
-		Email:     req.Email,
-		Name:      "Dummy User",
-		Verified:  true,
-		CreatedAt: now,
-		UpdatedAt: now,
 	}
 
 	// 返回響應
-	c.JSON(http.StatusOK, model.LoginResponse{
-		Token:     token,
-		ExpiresAt: expiresAt,
-		User:      user,
-	})
+	c.JSON(http.StatusOK, resp)
 }
 
 // VerifyEmail 處理用戶驗證
@@ -122,6 +94,16 @@ func (h *UserHandler) VerifyEmail(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
 			"error":  "Token is required",
+		})
+		return
+	}
+
+	// 調用服務層執行郵件驗證邏輯
+	err := h.userService.VerifyEmail(c.Request.Context(), req.Token)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status": "error",
+			"error":  err.Error(),
 		})
 		return
 	}

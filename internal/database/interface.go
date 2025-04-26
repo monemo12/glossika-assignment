@@ -7,7 +7,7 @@ import (
 )
 
 // Database 定義數據庫通用接口
-type Database interface {
+type IDatabase interface {
 	// Connect 建立數據庫連接
 	Connect() error
 	// Close 關閉數據庫連接
@@ -18,14 +18,14 @@ type Database interface {
 
 // MySQLDatabase 定義 MySQL 數據庫接口
 type MySQLDatabase interface {
-	Database
+	IDatabase
 	// GetDB 獲取 GORM 實例
 	GetDB() *gorm.DB
 }
 
 // RedisDatabase 定義 Redis 數據庫接口
 type RedisDatabase interface {
-	Database
+	IDatabase
 	// GetClient 獲取 Redis 客戶端
 	GetClient() interface{}
 }

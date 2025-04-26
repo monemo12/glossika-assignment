@@ -91,7 +91,7 @@ func main() {
 	apiGroup := r.Group("/api/v1")
 
 	// 設置用戶路由
-	userHandler := handler.NewUserHandler(mysqlClient)
+	userHandler := handler.NewUserHandler(mysqlClient, cfg.Email)
 	userHandler.SetupRoutes(apiGroup)
 
 	// 設置推薦路由

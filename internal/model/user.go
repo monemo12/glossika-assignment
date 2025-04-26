@@ -1,12 +1,14 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 // User 定義用戶實體
 type User struct {
-	ID        string    `json:"id"`
+	ID        string    `json:"id" gorm:"primaryKey;autoIncrement:true"`
 	Email     string    `json:"email"`
-	Password  string    `json:"password,omitempty"`
+	Password  string    `json:"password,omitempty" gorm:"column:password_hash"`
 	Name      string    `json:"name"`
 	Verified  bool      `json:"verified"`
 	CreatedAt time.Time `json:"createdAt"`

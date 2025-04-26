@@ -12,11 +12,11 @@ import (
 
 // RecommendationHandler 定義推薦功能的路由處理器
 type RecommendationHandler struct {
-	db database.Database
+	db database.IDatabase
 }
 
 // NewRecommendationHandler 創建新的推薦功能處理器
-func NewRecommendationHandler(db database.Database) *RecommendationHandler {
+func NewRecommendationHandler(db database.IDatabase) *RecommendationHandler {
 	return &RecommendationHandler{
 		db: db,
 	}
