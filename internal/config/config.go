@@ -14,7 +14,6 @@ type Config struct {
 	MySQL  MySQLConfig  `mapstructure:"mysql"`
 	Redis  RedisConfig  `mapstructure:"redis"`
 	JWT    JWTConfig    `mapstructure:"jwt"`
-	Email  EmailConfig  `mapstructure:"email"`
 }
 
 // ServerConfig 定義服務器配置
@@ -45,15 +44,6 @@ type RedisConfig struct {
 type JWTConfig struct {
 	Secret        string `mapstructure:"secret"`
 	ExpireMinutes int    `mapstructure:"expireMinutes"`
-}
-
-// EmailConfig 定義 Email 配置
-type EmailConfig struct {
-	Sender   string `mapstructure:"sender"`
-	SMTPHost string `mapstructure:"smtpHost"`
-	SMTPPort int    `mapstructure:"smtpPort"`
-	Username string `mapstructure:"username"`
-	Password string `mapstructure:"password"`
 }
 
 // LoadConfig 加載配置

@@ -20,10 +20,3 @@ redis:
 jwt:
   secret: "super-secret-key"
   expireMinutes: 60
-
-email:
-  sender: "noreply@example.com"
-  smtpHost: "smtp.example.com"
-  smtpPort: 587
-  username: "noreply@example.com"
-  password: "smtp-password"

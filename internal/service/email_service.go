@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"glossika-assignment/internal/config"
 )
 
 // EmailService 定義郵件服務接口
@@ -13,14 +12,12 @@ type IEmailService interface {
 
 // EmailService 實現郵件服務接口
 type EmailService struct {
-	config config.EmailConfig
+	IEmailService
 }
 
 // NewEmailService 創建新的郵件服務
-func NewEmailService(cfg config.EmailConfig) *EmailService {
-	return &EmailService{
-		config: cfg,
-	}
+func NewEmailService() *EmailService {
+	return &EmailService{}
 }
 
 // SendVerificationEmail 發送驗證郵件 (Dummy)

@@ -97,7 +97,7 @@ func main() {
 	recommendationRepo := repository.NewRecommendationRepository(mysqlClient, redisClient)
 
 	// Initialize services
-	emailService := service.NewEmailService(cfg.Email)
+	emailService := service.NewEmailService()
 	userService := service.NewUserService(userRepo, emailService)
 	recommendationService := service.NewRecommendationService(recommendationRepo)
 
