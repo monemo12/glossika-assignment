@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"time"
 
 	"glossika-assignment/internal/database"
@@ -14,10 +14,10 @@ import (
 
 // RecommendationRepository 定義推薦數據訪問接口
 type IRecommendationRepository interface {
-	FetchItems(ctx context.Context, limit, offset int) ([]*model.RecommendationItem, error)
-	fetchItemsFromDB(ctx context.Context, limit, offset int) ([]*model.RecommendationItem, error)
-	fetchItemsFromRedis(ctx context.Context, limit, offset int) ([]*model.RecommendationItem, error)
-	cacheItemsToRedis(ctx context.Context, items []*model.RecommendationItem, ttl time.Duration) error
+	FetchItems(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
+	fetchItemsFromDB(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
+	fetchItemsFromRedis(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
+	cacheItemsToRedis(ctx context.Context, items []*model.Recommendation, ttl time.Duration) error
 }
 
 type RecommendationRepository struct {
@@ -32,7 +32,11 @@ func NewRecommendationRepository(db database.MySQLDatabase, redis database.Redis
 	}
 }
 
-func (r *RecommendationRepository) FetchItems(ctx context.Context, limit, offset int) ([]*model.RecommendationItem, error) {
+const (
+	recommendationKey = "recommendations"
+)
+
+func (r *RecommendationRepository) FetchItems(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
 	// 從 Redis 中獲取推薦項目
 	items, err := r.fetchItemsFromRedis(ctx, limit, offset)
 	if err != nil {
@@ -48,8 +52,8 @@ func (r *RecommendationRepository) FetchItems(ctx context.Context, limit, offset
 		return nil, err
 	}
 
-	// 將推薦項目緩存到 Redis
-	err = r.cacheItemsToRedis(ctx, items, 10*time.Second)
+	// 將推薦項目緩存到 Redis, 過期時間為 10 分鐘
+	err = r.cacheItemsToRedis(ctx, items, 10*time.Minute)
 	if err != nil {
 		return nil, err
 	}
@@ -57,14 +61,64 @@ func (r *RecommendationRepository) FetchItems(ctx context.Context, limit, offset
 	return items, nil
 }
 
-func (r *RecommendationRepository) fetchItemsFromDB(ctx context.Context, limit, offset int) ([]*model.RecommendationItem, error) {
-	return nil, errors.New("not implemented")
+func (r *RecommendationRepository) fetchItemsFromDB(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
+	items := make([]*model.Recommendation, 0, limit)
+	err := r.db.WithContext(ctx).Order("score DESC").Limit(limit).Offset(offset).Find(&items).Error
+	// 模擬慢速查詢
+	time.Sleep(3 * time.Second)
+	return items, err
 }
 
-func (r *RecommendationRepository) fetchItemsFromRedis(ctx context.Context, limit, offset int) ([]*model.RecommendationItem, error) {
-	return nil, errors.New("not implemented")
+func (r *RecommendationRepository) fetchItemsFromRedis(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
+	// 使用 ZRANGE 從有序集合中獲取指定範圍的項目
+	results, err := r.rdb.ZRevRange(ctx, recommendationKey, int64(offset), int64(offset+limit-1)).Result()
+
+	// 如果沒有找到任何結果，返回空切片
+	if err != nil {
+		if err == redis.Nil {
+			return make([]*model.Recommendation, 0), nil
+		}
+		return nil, err
+	}
+
+	// 將結果反序列化為 Recommendation 切片
+	items := make([]*model.Recommendation, 0, len(results))
+	for _, result := range results {
+		var item model.Recommendation
+		if err := json.Unmarshal([]byte(result), &item); err != nil {
+			return nil, err
+		}
+		items = append(items, &item)
+	}
+
+	return items, nil
 }
 
-func (r *RecommendationRepository) cacheItemsToRedis(ctx context.Context, items []*model.RecommendationItem, ttl time.Duration) error {
-	return errors.New("not implemented")
+func (r *RecommendationRepository) cacheItemsToRedis(ctx context.Context, items []*model.Recommendation, ttl time.Duration) error {
+	// 在更新前先清除舊的數據
+	r.rdb.Del(ctx, recommendationKey)
+
+	// 使用 pipeline 批量添加數據
+	pipe := r.rdb.Pipeline()
+
+	for _, item := range items {
+		// 將項目序列化為 JSON
+		data, err := json.Marshal(item)
+		if err != nil {
+			return err
+		}
+
+		// 添加到有序集合
+		pipe.ZAdd(ctx, recommendationKey, redis.Z{
+			Score:  item.Score,
+			Member: string(data),
+		})
+	}
+
+	// 設置過期時間
+	pipe.Expire(ctx, recommendationKey, ttl)
+
+	// 執行 pipeline
+	_, err := pipe.Exec(ctx)
+	return err
 }

@@ -24,9 +24,10 @@ class RecommendationService {
 }
 
 class RecommendationRepository {
+    +FetchItems()
     +FetchFromDB()
-    +CacheToRedis()
     +FetchFromRedis()
+    +CacheToRedis()
 }
 
 RecommendationService --> RecommendationRepository

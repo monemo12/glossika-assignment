@@ -23,7 +23,7 @@ glossika-assignment/
 │   ├── model/               # Data structures
 │   │   ├── user.go
 │   │   └── recommendation.go
-│   ├── middleware/          # Authentication middleware
+│   ├── middleware/          # Middlewares
 │   │   └── auth.go
 │   └── utils/               # Utility functions
 │       ├── email.go
@@ -37,12 +37,12 @@ glossika-assignment/
 
 ## Getting Started
 
-1. Make sure you have Go installed (version 1.16 or higher)
+1. Make sure you have Docker and Docker Compose installed
 2. Clone this repository
-3. Configure your environment in `configs/config.yaml`
+3. Prepare `.env` file to put under the project root path
 4. Run the application:
    ```bash
-   go run cmd/main.go
+   docker-compose --env-file .env up -d
    ```
 
 ## Development
@@ -54,9 +54,3 @@ glossika-assignment/
 - Data models are in `internal/model/`
 - Middleware functions are in `internal/middleware/`
 - Utility functions are in `internal/utils/` 
-
-
-## Execution
-
-1. Prepare `.env` file to put under the project root path.
-2. Run by docker-compose `docker-compose --env-file .env up -d`
