@@ -25,11 +25,19 @@ func NewRecommendationService(repo repository.IRecommendationRepository) *Recomm
 
 // GetRecommendations 獲取推薦項目
 func (s *RecommendationService) GetRecommendations(ctx context.Context, req *model.RecommendationRequest) (*model.RecommendationResponse, error) {
-	items, err := s.repo.FetchItems(ctx, req.Limit, req.Offset)
+	items, err := s.repo.FetchItemsByPagination(ctx, req.Limit, req.Offset)
 	if err != nil {
 		return nil, err
 	}
+
+	total, err := s.repo.FetchItemsCount(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return &model.RecommendationResponse{
-		Items: items,
+		Items:    items,
+		Total:    total,
+		NextPage: total > req.Offset+req.Limit,
 	}, nil
 }

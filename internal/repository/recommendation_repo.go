@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"glossika-assignment/internal/database"
@@ -14,10 +15,13 @@ import (
 
 // RecommendationRepository 定義推薦數據訪問接口
 type IRecommendationRepository interface {
-	FetchItems(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
+	FetchItemsByPagination(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
+	FetchItemsCount(ctx context.Context) (int, error)
 	fetchItemsFromDB(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
 	fetchItemsFromRedis(ctx context.Context, limit, offset int) ([]*model.Recommendation, error)
 	cacheItemsToRedis(ctx context.Context, items []*model.Recommendation, ttl time.Duration) error
+	fetchItemsCountFromDB(ctx context.Context) (int, error)
+	fetchItemsCountFromRedis(ctx context.Context) (int, error)
 }
 
 type RecommendationRepository struct {
@@ -36,7 +40,7 @@ const (
 	recommendationKey = "recommendations"
 )
 
-func (r *RecommendationRepository) FetchItems(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
+func (r *RecommendationRepository) FetchItemsByPagination(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
 	// 從 Redis 中獲取推薦項目
 	items, err := r.fetchItemsFromRedis(ctx, limit, offset)
 	if err != nil {
@@ -59,6 +63,24 @@ func (r *RecommendationRepository) FetchItems(ctx context.Context, limit, offset
 	}
 
 	return items, nil
+}
+
+func (r *RecommendationRepository) FetchItemsCount(ctx context.Context) (int, error) {
+	count, err := r.fetchItemsCountFromRedis(ctx)
+	if err != nil {
+		fmt.Println("fetchItemsCountFromRedis error", err)
+	}
+
+	if count > 0 {
+		return count, nil
+	}
+
+	count, err = r.fetchItemsCountFromDB(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return count, nil
 }
 
 func (r *RecommendationRepository) fetchItemsFromDB(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
@@ -121,4 +143,15 @@ func (r *RecommendationRepository) cacheItemsToRedis(ctx context.Context, items 
 	// 執行 pipeline
 	_, err := pipe.Exec(ctx)
 	return err
+}
+
+func (r *RecommendationRepository) fetchItemsCountFromDB(ctx context.Context) (int, error) {
+	var count int64
+	err := r.db.WithContext(ctx).Model(&model.Recommendation{}).Count(&count).Error
+	return int(count), err
+}
+
+func (r *RecommendationRepository) fetchItemsCountFromRedis(ctx context.Context) (int, error) {
+	count, err := r.rdb.ZCard(ctx, recommendationKey).Result()
+	return int(count), err
 }
