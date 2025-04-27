@@ -40,7 +40,7 @@ const (
 	recommendationKey           = "recommendations"
 	recommendationPageKeyFormat = "recommendations:page:%d:%d" // format: recommendations:page:limit:offset
 	recommendationAllKey        = "recommendations:all"
-	cacheBatchSize              = 500 // 緩存批次大小，每次從數據庫多取數據
+	cacheBatchSize              = 50 // 緩存批次大小，每次從數據庫多取數據
 	defaultCacheTTL             = 10 * time.Minute
 )
 
@@ -56,24 +56,30 @@ func (r *RecommendationRepository) FetchItemsByPagination(ctx context.Context, l
 		return items, nil
 	}
 
+	// 計算需要從數據庫獲取的數據量
+	var size int
+	if cacheBatchSize > offset+limit {
+		size = cacheBatchSize
+	} else {
+		size = offset + limit
+	}
+
 	// 從數據庫獲取當前請求所需的數據
-	items, err = r.fetchItemsFromDB(ctx, limit, offset)
+	items, err = r.fetchItemsFromDB(ctx, size, 0)
 	if err != nil {
 		return nil, err
 	}
 
 	// 異步預加載更多數據到緩存
 	go func() {
+		defer func(start time.Time) {
+			fmt.Printf("快取 Redis 執行時間: %s\n", time.Since(start))
+		}(time.Now())
+
 		bgCtx := context.Background()
-		// 從數據庫獲取更多數據用於緩存
-		cacheItems, err := r.fetchItemsFromDB(bgCtx, cacheBatchSize, 0)
-		if err != nil {
-			fmt.Printf("Error fetching items for cache: %v\n", err)
-			return
-		}
 
 		// 緩存數據到Redis
-		err = r.cacheItemsToRedis(bgCtx, cacheItems, defaultCacheTTL)
+		err = r.cacheItemsToRedis(bgCtx, items, defaultCacheTTL)
 		if err != nil {
 			fmt.Printf("Error caching items to Redis: %v\n", err)
 		}
