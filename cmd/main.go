@@ -7,6 +7,8 @@ import (
 	"glossika-assignment/internal/config"
 	"glossika-assignment/internal/database"
 	"glossika-assignment/internal/handler"
+	"glossika-assignment/internal/repository"
+	"glossika-assignment/internal/service"
 	"glossika-assignment/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -90,12 +92,20 @@ func main() {
 	// 初始化 API 路由
 	apiGroup := r.Group("/api/v1")
 
-	// 設置用戶路由
-	userHandler := handler.NewUserHandler(mysqlClient, cfg.Email)
+	// Initialize repositories
+	userRepo := repository.NewUserRepository(mysqlClient)
+	recommendationRepo := repository.NewRecommendationRepository(mysqlClient, redisClient)
+
+	// Initialize services
+	emailService := service.NewEmailService(cfg.Email)
+	userService := service.NewUserService(userRepo, emailService)
+	recommendationService := service.NewRecommendationService(recommendationRepo)
+
+	// Initialize and setup handlers
+	userHandler := handler.NewUserHandler(userService)
 	userHandler.SetupRoutes(apiGroup)
 
-	// 設置推薦路由
-	recommendationHandler := handler.NewRecommendationHandler(mysqlClient)
+	recommendationHandler := handler.NewRecommendationHandler(recommendationService)
 	recommendationHandler.SetupRoutes(apiGroup)
 
 	// 啟動服務器

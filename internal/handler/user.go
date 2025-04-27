@@ -1,10 +1,7 @@
 package handler
 
 import (
-	"glossika-assignment/internal/config"
-	"glossika-assignment/internal/database"
 	"glossika-assignment/internal/model"
-	"glossika-assignment/internal/repository"
 	"glossika-assignment/internal/service"
 	"net/http"
 
@@ -17,12 +14,7 @@ type UserHandler struct {
 }
 
 // NewUserHandler 創建新的用戶功能處理器
-func NewUserHandler(db database.MySQLDatabase, cfg config.EmailConfig) *UserHandler {
-
-	userRepo := repository.NewUserRepository(db)
-	emailService := service.NewEmailService(cfg)
-	userService := service.NewUserService(userRepo, emailService)
-
+func NewUserHandler(userService service.IUserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}

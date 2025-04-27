@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -27,5 +28,5 @@ type MySQLDatabase interface {
 type RedisDatabase interface {
 	IDatabase
 	// GetClient 獲取 Redis 客戶端
-	GetClient() interface{}
+	GetClient() *redis.Client
 }

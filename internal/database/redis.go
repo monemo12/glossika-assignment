@@ -62,6 +62,6 @@ func (c *RedisClient) HealthCheck(ctx context.Context) error {
 }
 
 // GetClient 獲取 Redis 客戶端
-func (c *RedisClient) GetClient() interface{} {
+func (c *RedisClient) GetClient() *redis.Client {
 	return c.client
 }
