@@ -37,7 +37,11 @@ func NewRecommendationRepository(db database.MySQLDatabase, redis database.Redis
 }
 
 const (
-	recommendationKey = "recommendations"
+	recommendationKey           = "recommendations"
+	recommendationPageKeyFormat = "recommendations:page:%d:%d" // format: recommendations:page:limit:offset
+	recommendationAllKey        = "recommendations:all"
+	cacheBatchSize              = 500 // 緩存批次大小，每次從數據庫多取數據
+	defaultCacheTTL             = 10 * time.Minute
 )
 
 func (r *RecommendationRepository) FetchItemsByPagination(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
@@ -46,21 +50,34 @@ func (r *RecommendationRepository) FetchItemsByPagination(ctx context.Context, l
 	if err != nil {
 		return nil, err
 	}
-	if len(items) > 0 {
+
+	// 如果從 Redis 中獲取到足夠的數據，直接返回
+	if len(items) == limit {
 		return items, nil
 	}
 
-	// 從 MySQL 中獲取推薦項目
+	// 從數據庫獲取當前請求所需的數據
 	items, err = r.fetchItemsFromDB(ctx, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
-	// 將推薦項目緩存到 Redis, 過期時間為 10 分鐘
-	err = r.cacheItemsToRedis(ctx, items, 10*time.Minute)
-	if err != nil {
-		return nil, err
-	}
+	// 異步預加載更多數據到緩存
+	go func() {
+		bgCtx := context.Background()
+		// 從數據庫獲取更多數據用於緩存
+		cacheItems, err := r.fetchItemsFromDB(bgCtx, cacheBatchSize, 0)
+		if err != nil {
+			fmt.Printf("Error fetching items for cache: %v\n", err)
+			return
+		}
+
+		// 緩存數據到Redis
+		err = r.cacheItemsToRedis(bgCtx, cacheItems, defaultCacheTTL)
+		if err != nil {
+			fmt.Printf("Error caching items to Redis: %v\n", err)
+		}
+	}()
 
 	return items, nil
 }

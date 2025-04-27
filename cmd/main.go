@@ -35,6 +35,11 @@ func main() {
 		}
 	}()
 
+	// 執行數據庫 seed - 生成100個推薦項目
+	if err := database.SeedRecommendations(mysqlClient.GetDB(), 100); err != nil {
+		log.Printf("Warning: Failed to seed database: %v", err)
+	}
+
 	// 初始化 Redis 連接
 	redisClient := database.NewRedisClient(cfg.Redis)
 	if err := redisClient.Connect(); err != nil {
