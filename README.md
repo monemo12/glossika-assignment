@@ -15,8 +15,11 @@ glossika-assignment/
 │   ├── repository/     # 資料存取層，與資料庫互動
 │   ├── service/        # 商業邏輯（用戶、推薦、Email 服務）
 │   └── utils/          # 通用工具（密碼、Email、JWT 等）
-├── migrations/
+├── migrations/         # Database migrations
 ├── docs/
+│   ├── API.md                               # API 詳細說明文件
+│   ├── architecture.plantuml                # 系統架構圖
+│   └── Glossika Assignment.postman_collection.json  # Postman API 集合
 ```
 
 ## Getting Started
@@ -28,8 +31,3 @@ glossika-assignment/
    ```bash
    docker-compose --env-file .env up -d
    ```
-
-## API 文件
-
-- Postman Collection File: `docs/Glossika Assignment.postman_collection.json`
-- 詳細說明文件： `docs/API.md`
