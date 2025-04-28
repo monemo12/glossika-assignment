@@ -2,55 +2,33 @@
 
 This is a Go project for the recommendation system.
 
-## Project Structure
+## Project Layout
 
 ```
 glossika-assignment/
-├── cmd/
-│   └── main.go              # Application entry point
-├── configs/
-│   └── config.yaml          # Configuration file
+├── cmd/                # 主程式
+├── configs/            # 設定檔
 ├── internal/
-│   ├── handler/             # HTTP handlers
-│   │   ├── user.go
-│   │   └── recommendation.go
-│   ├── service/             # Business logic
-│   │   ├── user_service.go
-│   │   └── recommendation_service.go
-│   ├── repository/          # Database access
-│   │   ├── user_repo.go
-│   │   └── recommendation_repo.go
-│   ├── model/               # Data structures
-│   │   ├── user.go
-│   │   └── recommendation.go
-│   ├── middleware/          # Middlewares
-│   │   └── auth.go
-│   └── utils/               # Utility functions
-│       ├── email.go
-│       ├── hash.go
-│       └── jwt.go
+│   ├── config/         # 設定結構與讀取
+│   ├── database/       # 資料庫連線、操作與種子資料（MySQL、Redis）
+│   ├── handler/        # HTTP 路由與請求處理
+│   ├── middleware/     # Gin 中介層（如 JWT 驗證）
+│   ├── model/          # 資料結構定義（User、Recommendation）
+│   ├── repository/     # 資料存取層，與資料庫互動
+│   ├── service/        # 商業邏輯（用戶、推薦、Email 服務）
+│   └── utils/          # 通用工具（密碼、Email、JWT 等）
 ├── migrations/
-│   └── schema.sql          # Database schema
-├── go.mod                  # Go module definition
-└── README.md              # Project documentation
+├── docs/
 ```
 
 ## Getting Started
 
-1. Make sure you have Docker and Docker Compose installed
-2. Clone this repository
-3. Prepare `.env` file to put under the project root path
-4. Run the application:
+1. 請先安裝 Docker 與 Docker Compose。
+2. Clone 此 repository。
+3. 準備 `.env` 檔案（檔案內容會由我以郵件提供），放在專案根目錄下。
+4. 啟動專案：
    ```bash
    docker-compose --env-file .env up -d
    ```
 
-## Development
-
-- The main application entry point is in `cmd/main.go`
-- HTTP handlers are in `internal/handler/`
-- Business logic is in `internal/service/`
-- Database access is in `internal/repository/`
-- Data models are in `internal/model/`
-- Middleware functions are in `internal/middleware/`
-- Utility functions are in `internal/utils/` 
+## System Architecture

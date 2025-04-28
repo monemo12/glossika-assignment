@@ -1,47 +1,55 @@
 @startuml
 
-' 定義 UserService 與其相依元件
+' Handler 層
+class UserHandler
+class RecommendationHandler
+
+' Middleware 層
+class AuthMiddleware
+
+' Service 層
 class UserService {
     +Register()
     +Login()
     +VerifyEmail()
 }
-
-class UserRepo {
-    +CreateUser()
-    +GetUserByEmail()
-    +UpdateVerified()
-}
-
-class MySQL
-
-UserService --> UserRepo
-UserRepo --> MySQL
-
-' RecommendationService 部分
 class RecommendationService {
     +GetRecommendations()
 }
-
-class RecommendationRepository {
-    +FetchItems()
-    +FetchFromDB()
-    +FetchFromRedis()
-    +CacheToRedis()
+class EmailService {
+    +SendVerificationEmail()
 }
 
-RecommendationService --> RecommendationRepository
+' Repository 層
+class UserRepository {
+    +CreateUser()
+    +GetUserByEmail()
+    +UpdateUserVerification()
+    +CheckUserExists()
+}
+class RecommendationRepository {
+    +FetchItemsByPagination()
+    +FetchItemsCount()
+    +fetchItemsFromDB()
+    +fetchItemsFromRedis()
+    +cacheItemsToRedis()
+}
 
+' Database 層
+class MySQL
 class Redis
 
-RecommendationRepository --> Redis
-RecommendationRepository --> MySQL
+' 依賴關係
+UserHandler --> UserService
+RecommendationHandler --> RecommendationService
+RecommendationHandler ..> AuthMiddleware
 
-' EmailService
-class EmailService {
-    +SendVerification()
-}
-
+UserService --> UserRepository
 UserService --> EmailService
+RecommendationService --> RecommendationRepository
+
+UserRepository --> MySQL
+RecommendationRepository --> MySQL
+RecommendationRepository --> Redis
 
 @enduml
