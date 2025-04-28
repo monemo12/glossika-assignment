@@ -21,7 +21,6 @@ type IUserService interface {
 
 // UserService 實現用戶服務接口
 type UserService struct {
-	IUserService
 	userRepo     repository.IUserRepository
 	emailService IEmailService
 }

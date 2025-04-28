@@ -12,7 +12,6 @@ type IEmailService interface {
 
 // EmailService 實現郵件服務接口
 type EmailService struct {
-	IEmailService
 }
 
 // NewEmailService 創建新的郵件服務
