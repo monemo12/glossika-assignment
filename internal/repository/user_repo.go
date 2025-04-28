@@ -23,7 +23,7 @@ type UserRepository struct {
 }
 
 // NewUserRepository 創建新的用戶數據訪問實例
-func NewUserRepository(db database.MySQLDatabase) *UserRepository {
+func NewUserRepository(db database.MySQLDatabase) IUserRepository {
 	return &UserRepository{
 		db: db.GetDB(),
 	}

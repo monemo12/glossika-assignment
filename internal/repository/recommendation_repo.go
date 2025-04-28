@@ -29,7 +29,7 @@ type RecommendationRepository struct {
 	rdb *redis.Client
 }
 
-func NewRecommendationRepository(db database.MySQLDatabase, redis database.RedisDatabase) *RecommendationRepository {
+func NewRecommendationRepository(db database.MySQLDatabase, redis database.RedisDatabase) IRecommendationRepository {
 	return &RecommendationRepository{
 		db:  db.GetDB(),
 		rdb: redis.GetClient(),
@@ -37,11 +37,10 @@ func NewRecommendationRepository(db database.MySQLDatabase, redis database.Redis
 }
 
 const (
-	recommendationKey           = "recommendations"
-	recommendationPageKeyFormat = "recommendations:page:%d:%d" // format: recommendations:page:limit:offset
-	recommendationAllKey        = "recommendations:all"
-	cacheBatchSize              = 50 // 緩存批次大小，每次從數據庫多取數據
-	defaultCacheTTL             = 10 * time.Minute
+	recommendationKey    = "recommendations"
+	recommendationAllKey = "recommendations:all"
+	cacheBatchSize       = 50
+	defaultCacheTTL      = 10 * time.Minute
 )
 
 func (r *RecommendationRepository) FetchItemsByPagination(ctx context.Context, limit, offset int) ([]*model.Recommendation, error) {
