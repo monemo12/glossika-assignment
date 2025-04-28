@@ -72,15 +72,15 @@
 								},
 								{
 									"key": "Date",
-									"value": "Sat, 26 Apr 2025 17:14:27 GMT"
+									"value": "Mon, 28 Apr 2025 15:25:50 GMT"
 								},
 								{
 									"key": "Content-Length",
-									"value": "86"
+									"value": "143"
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"userId\": \"2\",\n    \"email\": \"example@test.com\",\n    \"createdAt\": \"2025-04-26T17:14:27.362671059Z\"\n}"
+							"body": "{\n    \"userId\": \"2\",\n    \"email\": \"example@test.com\",\n    \"verificationToken\": \"cc822897-ca74-4c76-a92b-71bf74e95a8a\",\n    \"createdAt\": \"2025-04-28T15:25:50.8134091Z\"\n}"
 						},
 						{
 							"name": "user exists",
@@ -506,12 +506,6 @@
 							"path": [
 								"{{base_url}}",
 								"recommendations"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1"
-								}
 							]
 						}
 					},
@@ -571,6 +565,12 @@
 									"path": [
 										"{{base_url}}",
 										"recommendations"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "1"
+										}
 									]
 								}
 							},
@@ -597,6 +597,16 @@
 					]
 				}
 			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
 			"event": [
 				{
 					"listen": "prerequest",
