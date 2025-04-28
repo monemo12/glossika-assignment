@@ -25,9 +25,8 @@ glossika-assignment/
 ## Getting Started
 
 1. 請先安裝 Docker 與 Docker Compose。
-2. Clone 此 repository。
-3. 準備 `.env` 檔案（檔案內容會由我以郵件提供），放在專案根目錄下。
-4. 啟動專案：
+2. 準備 `.env` 檔案（附加在郵件中），放在專案根目錄下。
+3. 啟動專案：
    ```bash
    docker-compose --env-file .env up -d
    ```
