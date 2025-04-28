@@ -30,3 +30,4 @@ glossika-assignment/
    ```bash
    docker-compose --env-file .env up -d
    ```
+4. API 測試：透過 `docs/Glossika Assignment.postman_collection.json` 匯入 Postman，提供所有 API 的測試範例
