@@ -1,7 +1,5 @@
 # Glossika Assignment
 
-This is a Go project for the recommendation system.
-
 ## Project Layout
 
 ```
@@ -31,4 +29,7 @@ glossika-assignment/
    docker-compose --env-file .env up -d
    ```
 
-## System Architecture
+## API 文件
+
+- Postman Collection File: `docs/Glossika Assignment.postman_collection.json`
+- 詳細說明文件： `docs/API.md`
