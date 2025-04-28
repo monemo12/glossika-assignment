@@ -28,9 +28,17 @@ func NewRedisClient(cfg config.RedisConfig) *RedisClient {
 func (c *RedisClient) Connect() error {
 	// 創建 Redis 客戶端
 	c.client = redis.NewClient(&redis.Options{
-		Addr:     c.config.GetRedisAddr(),
-		Password: c.config.Password,
-		DB:       c.config.DB,
+		Addr:            c.config.GetRedisAddr(),
+		Password:        c.config.Password,
+		DB:              c.config.DB,
+		PoolSize:        20,
+		MinIdleConns:    5,
+		PoolTimeout:     30 * time.Second,
+		DialTimeout:     5 * time.Second,
+		ReadTimeout:     3 * time.Second,
+		WriteTimeout:    3 * time.Second,
+		ConnMaxIdleTime: 5 * time.Minute,
+		ConnMaxLifetime: 10 * time.Minute,
 	})
 
 	// 測試連接
